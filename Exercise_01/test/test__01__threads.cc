@@ -11,6 +11,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <mutex>
 
 using namespace std;
 
@@ -22,13 +23,15 @@ TEST_CASE("each thread output appears exactly once and intact")
 
   int32_t const N_threads = 10;
   vector<thread> threads;
+  mutex idx_mutex;
 
   ostringstream ostr;
   for (int32_t idx=0; idx<N_threads; ++idx)
   {
     threads.push_back(
       thread(
-        [&ostr, &idx] () {
+        [&idx_mutex, &ostr, idx] () {
+          lock_guard<mutex> lg(idx_mutex);
           ostr << "This is the output for thread idx=" << idx << endl;
         }
       )
